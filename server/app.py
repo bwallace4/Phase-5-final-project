@@ -3,38 +3,38 @@
 # Standard library imports
 
 # Remote library imports
-from flask import make_response, request,jsonify
+from flask import request,jsonify
 from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import User,Group
+from models import Message
 
 # Views go here!
 
-@app.route('/user', methods=['GET', 'POST'])
-def users():
+@app.route('/messages', methods=['GET', 'POST'])
+def messages():
     if request.method == 'GET':
-        users = User.query.order_by('created_at').all()
+        messages = Message.query.order_by('created_at').all()
 
         response = make_response(
-            jsonify([user.to_dict() for user in users]),
+            jsonify([message.to_dict() for message in messages]),
             200,
         )
     
     elif request.method == 'POST':
         data = request.get_json()
-        user= User(
-            email=data['email'],
+        message = Message(
+            body=data['body'],
             username=data['username']
         )
 
-        db.session.add(user)
+        db.session.add(message)
         db.session.commit()
 
         response = make_response(
-            jsonify(user.to_dict()),
+            jsonify(message.to_dict()),
             201,
         )
 
