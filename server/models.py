@@ -1,66 +1,41 @@
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship
 
 
 from config import db
 
 # Models go here!
-class User(db.Model, SerializerMixin):
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+
+# Define the association table
+user_group_association = db.Table(
+    'user_group_association',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+)
+
+class User(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String)
-    username = db.Column(db.String)
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
+    username = db.Column(db.String(80), unique=True, nullable=False)
 
-    comments = relationship('Comment', secondary='user_comment', backref='commented_by')
-
+    # Define the many-to-many relationship with Group
+    groups = db.relationship('Group', secondary=user_group_association, backref='users')
 
     def __repr__(self):
-        return f'<User(id={self.id}, username={self.username}, email={self.email})>'
+        return f'<User(id={self.id}, username={self.username})>'
 
-class Comment(db.Model, SerializerMixin):
-    __tablename__ = 'comment'
+class Group(db.Model):
+    __tablename__ = 'group'
 
     id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
+    name = db.Column(db.String(80), unique=True, nullable=False)
 
-    commented_by = relationship('User', secondary='user_comment', backref='comments')
+    # Define the many-to-many relationship with User
+    users = db.relationship('User', secondary=user_group_association, backref='groups')
 
     def __repr__(self):
-        return f"<Comment(id={self.id}, user_id={self.user_id}, post_id={self.post_id}, created_at={self.created_at})>"
-
-class Post(db.Model, SerializerMixin):
-    __tablename__ = 'post'
-
-    id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String)
-    content = db.Column(db.Text)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    created_at = db.Column(db.DateTime, server_default=db.func.now())
-    updated_at = db.Column(db.DateTime, onupdate=db.func.now())
-
-    def __repr__(self):
-        return f"<Post(id={self.id}, title='{self.title}', user_id={self.user_id}, created_at={self.created_at})>"
-    
-class Favorites(db.Model, SerializerMixin):
-     __tablename__ = 'favorites'
-    
-     id = db.Column(db.Integer, primary_key=True)
-     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-     post_id = db.Column(db.Integer, db.ForeignKey('post.id'), nullable=False)
-
-     def __repr__(self):
-        return f'<Favorites(id={self.id}, user_id={self.user_id}, post_id={self.post_id})>'
-     
-class UserComment(db.Model,SerializerMixin):
-    __tablename__ = 'user_comment'
-
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    comment_id = db.Column(db.Integer, db.ForeignKey('comment.id'), nullable=False)
+        return f'<Group(id={self.id}, name={self.name})>'

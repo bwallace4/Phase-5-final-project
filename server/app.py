@@ -9,32 +9,32 @@ from flask_restful import Resource
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import User,Comment,Post,Favorites,UserComment
+from models import User,Group
 
 # Views go here!
 
-@app.route('/messages', methods=['GET', 'POST'])
-def messages():
+@app.route('/user', methods=['GET', 'POST'])
+def users():
     if request.method == 'GET':
-        messages = Message.query.order_by('created_at').all()
+        users = User.query.order_by('created_at').all()
 
         response = make_response(
-            jsonify([message.to_dict() for message in messages]),
+            jsonify([user.to_dict() for user in users]),
             200,
         )
     
     elif request.method == 'POST':
         data = request.get_json()
-        message = Message(
-            body=data['body'],
+        user= User(
+            email=data['email'],
             username=data['username']
         )
 
-        db.session.add(message)
+        db.session.add(user)
         db.session.commit()
 
         response = make_response(
-            jsonify(message.to_dict()),
+            jsonify(user.to_dict()),
             201,
         )
 
