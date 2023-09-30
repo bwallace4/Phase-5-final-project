@@ -3,71 +3,35 @@
 # Standard library imports
 
 # Remote library imports
-from flask import request,jsonify
+from flask import request,jsonify,make_response
 from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Message
+from models import User
 
 # Views go here!
+@app.route('/users', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    username = data.get('username')
 
-@app.route('/messages', methods=['GET', 'POST'])
-def messages():
-    if request.method == 'GET':
-        messages = Message.query.order_by('created_at').all()
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
 
-        response = make_response(
-            jsonify([message.to_dict() for message in messages]),
-            200,
-        )
-    
-    elif request.method == 'POST':
-        data = request.get_json()
-        message = Message(
-            body=data['body'],
-            username=data['username']
-        )
+    user = User(username=username)
+    db.session.add(user)
+    db.session.commit()
 
-        db.session.add(message)
-        db.session.commit()
+    return jsonify({'message': 'User created successfully', 'user_id': user.id}), 201
 
-        response = make_response(
-            jsonify(message.to_dict()),
-            201,
-        )
-
-    return response
-
-@app.route('/messages/<int:id>', methods=['PATCH', 'DELETE'])
-def messages_by_id(id):
-    message = Message.query.filter_by(id=id).first()
-
-    if request.method == 'PATCH':
-        data = request.get_json()
-        for attr in data:
-            setattr(message, attr, data[attr])
-            
-        db.session.add(message)
-        db.session.commit()
-
-        response = make_response(
-            jsonify(message.to_dict()),
-            200,
-        )
-
-    elif request.method == 'DELETE':
-        db.session.delete(message)
-        db.session.commit()
-
-        response = make_response(
-            jsonify({'deleted': True}),
-            200,
-        )
-
-    return response
+# Get all users
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    user_list = [{'id': user.id, 'username': user.username} for user in users]
+    return jsonify(user_list)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
-
