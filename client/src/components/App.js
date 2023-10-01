@@ -1,46 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router,Switch, Route } from "react-router-dom";
-import Navbar from "../components/Navbar";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { Navbar } from "./layout";
+import { Home } from './Home';
+import { Products } from './products';
 
 function App() {
-  const [users, setUsers] = useState([]);
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:5555/users")
-      .then((r) => r.json())
-      .then((users) => setUsers(users));
-  }, []);
-
   return (
-    <>
     <Router>
-    <Navbar />
-    <Switch>
-      <Route path='/' exact />
-    </Switch>
-
+      <Navbar />
+      <Switch>
+        <Route exact path="/home" component={Home} />
+        <Route path="/products" component={Products} />
+      </Switch>
     </Router>
-  
-      
-      
-  
-    </>
-    
-  )
-  
+  );
 }
 
-
 export default App;
-// {users.map(user=> {
-//   return (
-//     <div key = {user.id}>
-   
-//       <p>{user.username}</p>
-
-      
-
-//       </div>
-      
-//   )
-// })}
