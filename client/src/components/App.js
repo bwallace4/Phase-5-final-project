@@ -1,19 +1,65 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { Navbar } from "./layout";
-import { Home } from './Home';
-import { Products } from './products';
 
-function App() {
+function ItemList() {
+  const [items, setItems] = useState([]);
+  const [name, setName] = useState('');
+
+  useEffect(() => {
+    fetch('/items')
+      .then((response) => response.json())
+      .then((data) => setItems(data));
+  }, []);
+
+  const handleCreateItem = () => {
+    fetch('/items', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name }),
+    })
+      .then((response) => response.json())
+      .then(() => {
+        setName('');
+        fetch('/items')
+          .then((response) => response.json())
+          .then((data) => setItems(data));
+      });
+  };
+
+  const handleDeleteItem = (id) => {
+    fetch(`/items/${id}`, {
+      method: 'DELETE',
+    })
+      .then(() => {
+        fetch('/items')
+          .then((response) => response.json())
+          .then((data) => setItems(data));
+      });
+  };
+
   return (
-    <Router>
-      <Navbar />
-      <Switch>
-        <Route exact path="/home" component={Home} />
-        <Route path="/products" component={Products} />
-      </Switch>
-    </Router>
+    <div>
+      <h1>Items</h1>
+      <ul>
+        {items.map((item) => (
+          <li key={item.id}>
+            {item.name}
+            <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
+          </li>
+        ))}
+      </ul>
+      <div>
+        <input
+          type="text"
+          placeholder="Item name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <button onClick={handleCreateItem}>Create</button>
+      </div>
+    </div>
   );
 }
 
-export default App;
+export default ItemList;
