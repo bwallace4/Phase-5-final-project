@@ -1,30 +1,46 @@
 import React, { useEffect, useState } from "react";
-import { Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router,Switch, Route } from "react-router-dom";
+import Navbar from "../components/Navbar";
 
 function App() {
-  const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5555/messages")
+    fetch("http://127.0.0.1:5555/users")
       .then((r) => r.json())
-      .then((messages) => setMessages(messages));
+      .then((users) => setUsers(users));
   }, []);
 
   return (
-    <div className="App">
-      <h1>me ans me </h1>
-      {messages.map(message => {
-        return (
-          <div key = {message.id}>
-            <h2>{message.body}</h2>
-            <p>{message.username}</p>
-            <p>{message.created_at}</p>
+    <>
+    <Router>
+    <Navbar />
+    <Switch>
+      <Route path='/' exact />
+    </Switch>
 
-            </div>
-        )
-      })}
-    </div>
+    </Router>
+  
+      
+      
+  
+    </>
+    
   )
+  
 }
 
+
 export default App;
+// {users.map(user=> {
+//   return (
+//     <div key = {user.id}>
+   
+//       <p>{user.username}</p>
+
+      
+
+//       </div>
+      
+//   )
+// })}
