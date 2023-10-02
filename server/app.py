@@ -3,28 +3,35 @@
 # Standard library imports
 
 # Remote library imports
-from flask import request,jsonify
+from flask import request,jsonify,make_response
 from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Users,user_schema,UserSchema
+from models import User
 
 # Views go here!
+@app.route('/users', methods=['POST'])
+def create_user():
+    data = request.get_json()
+    username = data.get('username')
 
+    if not username:
+        return jsonify({'error': 'Username is required'}), 400
 
-@app.route('/useradd' , methods = ['POST'])
-def useradd():
-   name = request.json['name']
-   email = request.json['email']
+    user = User(username=username)
+    db.session.add(user)
+    db.session.commit()
 
-   users = Users(name,email)
-   db.session.add(users)
-   db.session.commit
+    return jsonify({'message': 'User created successfully', 'user_id': user.id}), 201
 
-   return user_schema.jsonify(users)
- 
+# Get all users
+@app.route('/users', methods=['GET'])
+def get_users():
+    users = User.query.all()
+    user_list = [{'id': user.id, 'username': user.username} for user in users]
+    return jsonify(user_list)
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)

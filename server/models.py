@@ -1,40 +1,39 @@
-import datetime
-from flask_marshmallow import Marshmallow
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 
-
-from config import db,app
+from config import db
 
 # Models go here!
-ma=Marshmallow(app)
 
 
 # Define the association table
 
+user_group_association = db.Table(
+    'user_group_association',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+)
 
-class Users(db.Model):
-    __tablename__ = "users"
- 
+class User(db.Model,SerializerMixin):
+    __tablename__ = 'user'
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
-    date = db.Column(db.DateTime,default=datetime.datetime.now)
- 
-    def __init__(self,name,email):
-        self.name = name
-        self.email = email
+    username = db.Column(db.String(80), unique=True, nullable=False)
+
+    # Define the many-to-many relationship with Group
+    groups = db.relationship('Group', secondary=user_group_association, back_populates='users')
 
     def __repr__(self):
-        return f"{self.name}:{self.email}"
+        return f'<User(id={self.id}, username={self.username})>'
 
-class UserSchema(ma.Schema):
-    class Meta:
-        fields = ('id','name','email','date')
+class Group(db.Model,SerializerMixin):
+    __tablename__ = 'group'
 
-user_schema = UserSchema()
-user_schema = UserSchema(many =True)
- 
-       
- 
- 
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), unique=True, nullable=False)
+
+    # Define the many-to-many relationship with User
+    users = db.relationship('User', secondary=user_group_association, back_populates='groups')
+
+    def __repr__(self):
+        return f'<Group(id={self.id}, name={self.name})>'
