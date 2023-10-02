@@ -5,39 +5,42 @@
 # Remote library imports
 from flask import request,jsonify,make_response
 from flask_restful import Resource
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Item
+from models import User,Tag,Post
 
-# Views go here!
-@app.route('/items', methods=['GET', 'POST'])
-def items():
-    if request.method == 'GET':
-        items = Item.query.all()
-        items_list = [{'id': item.id, 'name': item.name} for item in items]
-        return jsonify(items_list)
-    elif request.method == 'POST':
-        data = request.json
-        new_item = Item(name=data['name'])
-        db.session.add(new_item)
-        db.session.commit()
-        return jsonify({'message': 'Item created successfully'}), 201
+@app.route('/register', methods=['POST'])
+def register_user():
+    data = request.json
 
-@app.route('/items/<int:item_id>', methods=['GET', 'PUT', 'DELETE'])
-def item(item_id):
-    item = Item.query.get_or_404(item_id)
-    if request.method == 'GET':
-        return jsonify({'id': item.id, 'name': item.name})
-    elif request.method == 'PUT':
-        data = request.json
-        item.name = data['name']
-        db.session.commit()
-        return jsonify({'message': 'Item updated successfully'})
-    elif request.method == 'DELETE':
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({'message': 'Item deleted successfully'})
+    # Check if the required fields are present in the request data
+    required_fields = ['username', 'email', 'password']
+    if not all(field in data for field in required_fields):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    # Check if a user with the same username or email already exists
+    existing_user = User.query.filter_by(username=data['username']).first()
+    if existing_user:
+        return jsonify({'error': 'Username is already taken'}), 400
+
+    existing_email = User.query.filter_by(email=data['email']).first()
+    if existing_email:
+        return jsonify({'error': 'Email is already registered'}), 400
+
+    # Hash the password before storing it in the database
+    password = data['password']
+    hashed_password = generate_password_hash(password, method='sha256')
+
+    # Create a new User instance
+    new_user = User(username=data['username'], email=data['email'], password_hash=hashed_password)
+
+    # Add the new user to the database
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'message': 'User registered successfully'}), 201
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
