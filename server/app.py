@@ -9,36 +9,22 @@ from flask_restful import Resource
 # Local imports
 from config import app, db, api
 # Add your model imports
-from models import Item
+from models import Users,user_schema,UserSchema
 
 # Views go here!
-@app.route('/items', methods=['GET', 'POST'])
-def items():
-    if request.method == 'GET':
-        items = Item.query.all()
-        items_list = [{'id': item.id, 'name': item.name} for item in items]
-        return jsonify(items_list)
-    elif request.method == 'POST':
-        data = request.json
-        new_item = Item(name=data['name'])
-        db.session.add(new_item)
-        db.session.commit()
-        return jsonify({'message': 'Item created successfully'}), 201
 
-@app.route('/items/<int:item_id>', methods=['GET', 'PUT', 'DELETE'])
-def item(item_id):
-    item = Item.query.get_or_404(item_id)
-    if request.method == 'GET':
-        return jsonify({'id': item.id, 'name': item.name})
-    elif request.method == 'PUT':
-        data = request.json
-        item.name = data['name']
-        db.session.commit()
-        return jsonify({'message': 'Item updated successfully'})
-    elif request.method == 'DELETE':
-        db.session.delete(item)
-        db.session.commit()
-        return jsonify({'message': 'Item deleted successfully'})
+
+@app.route('/useradd' , methods = ['POST'])
+def useradd():
+   name = request.json['name']
+   email = request.json['email']
+
+   users = Users(name,email)
+   db.session.add(users)
+   db.session.commit
+
+   return user_schema.jsonify(users)
+ 
 
 if __name__ == '__main__':
     app.run(port=5555, debug=True)
