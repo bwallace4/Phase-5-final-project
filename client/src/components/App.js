@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-// import { BrowserRouter as Router,Switch, Route } from "react-router-dom";
-
+import './ItemList.css'; // Import your CSS stylesheet
 
 function ItemList() {
   const [items, setItems] = useState([]);
   const [name, setName] = useState('');
-  const [editingItemId, setEditingItemId] = useState(null); // To track the item being edited
-  const [editedName, setEditedName] = useState(''); // To store the edited item name
+  const [editingItemId, setEditingItemId] = useState(null);
+  const [editedName, setEditedName] = useState('');
 
   useEffect(() => {
     fetch('http://127.0.0.1:5555/items')
@@ -16,7 +15,6 @@ function ItemList() {
 
   const handleCreateItem = () => {
     if (!editingItemId) {
-      // If not editing, create a new item
       fetch('http://127.0.0.1:5555/items', {
         method: 'POST',
         headers: {
@@ -32,7 +30,6 @@ function ItemList() {
             .then((data) => setItems(data));
         });
     } else {
-      // If editing, update the existing item
       fetch(` http://127.0.0.1:5555/items`, {
         method: 'PUT',
         headers: {
@@ -51,7 +48,6 @@ function ItemList() {
   };
 
   const handleEditItem = (id, itemName) => {
-    // Set the editing state when the "Edit" button is clicked
     setEditingItemId(id);
     setEditedName(itemName);
   };
@@ -68,13 +64,12 @@ function ItemList() {
   };
 
   return (
-    <div>
+    <div className="item-list-container">
       <h1>Items</h1>
-      <ul>
+      <ul className="item-list">
         {items.map((item) => (
           <li key={item.id}>
             {item.id === editingItemId ? (
-              // Render the edit form when editing
               <div>
                 <input
                   type="text"
@@ -85,9 +80,8 @@ function ItemList() {
                 <button onClick={handleCreateItem}>Save</button>
               </div>
             ) : (
-              // Render the item name and buttons when not editing
               <div>
-                {item.name}
+                <span>{item.name}</span>
                 <button onClick={() => handleEditItem(item.id, item.name)}>Edit</button>
                 <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
               </div>
@@ -97,7 +91,6 @@ function ItemList() {
       </ul>
       <div>
         {editingItemId === null && (
-          // Render the item creation form when not editing
           <div>
             <input
               type="text"

@@ -1,0 +1,49 @@
+/* ItemList.css */
+.item-list-container {
+    max-width: 400px;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+  }
+  
+  .item-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .item-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .item-name {
+    flex-grow: 1;
+    margin-right: 10px;
+    font-weight: bold;
+  }
+  
+  .edit-button,
+  .delete-button {
+    padding: 4px 8px;
+    border: none;
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    border-radius: 3px;
+  }
+  
+  .edit-button {
+    background-color: #28a745;
+    margin-right: 5px;
+  }
+  
+  .delete-button {
+    background-color: #dc3545;
+  }
+  
+  
