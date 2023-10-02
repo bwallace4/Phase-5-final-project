@@ -3,7 +3,7 @@ from sqlalchemy.ext.associationproxy import association_proxy
 import bcrypt
 from flask_sqlalchemy import SQLAlchemy
 from config import db
-
+from sqlalchemy.orm import validates
 
 class User(db.Model,SerializerMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +22,20 @@ class User(db.Model,SerializerMixin):
     
     def verify_password(self, password):
         return bcrypt.check_password_hash(self.password_hash, password) 
+    
+    @validates('username')
+    def validate_username(self, key, username):
+        # Check if username meets your validation criteria (e.g., length)
+        if len(username) < 3:
+            raise ValueError('Username must be at least 3 characters long.')
+        return username
+
+    @validates('email')
+    def validate_email(self, key, email):
+        # Check if email meets your validation criteria (e.g., format)
+        if not email or "@" not in email:
+            raise ValueError('Invalid email address.')
+        return email
 
 class Post(db.Model):
     id = db.Column(db.Integer, primary_key=True)
