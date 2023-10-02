@@ -8,32 +8,10 @@ from config import db
 
 # Define the association table
 
-user_group_association = db.Table(
-    'user_group_association',
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id'), primary_key=True),
-    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
-)
-
-class User(db.Model,SerializerMixin):
-    __tablename__ = 'user'
-
+         
+class Users(db.Model):
+    __tablename__ = "tblusers"
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-
-    # Define the many-to-many relationship with Group
-    groups = db.relationship('Group', secondary=user_group_association, back_populates='users')
-
-    def __repr__(self):
-        return f'<User(id={self.id}, username={self.username})>'
-
-class Group(db.Model,SerializerMixin):
-    __tablename__ = 'group'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), unique=True, nullable=False)
-
-    # Define the many-to-many relationship with User
-    users = db.relationship('User', secondary=user_group_association, back_populates='groups')
-
-    def __repr__(self):
-        return f'<Group(id={self.id}, name={self.name})>'
+    name = db.Column(db.String(150), index=True, unique=True)
+    email = db.Column(db.String(150), index=True, unique=True)
+    password = db.Column(db.String(255), index=True, unique=True)
