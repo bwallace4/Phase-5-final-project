@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 
-
-
 function UserList() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -14,7 +12,14 @@ function UserList() {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
-      setUsers(data);
+
+      // Add an 'index' property to each user object
+      const usersWithIndex = data.map((user, index) => ({
+        ...user,
+        index: index + 1, // Add 1 to start indexing from 1
+      }));
+
+      setUsers(usersWithIndex);
     } catch (error) {
       console.error(error);
     } finally {
@@ -22,20 +27,23 @@ function UserList() {
     }
   };
 
-  const handleDeleteUser = async (username) => {
+  const handleDeleteUser = async (id) => {
     try {
-      const response = await fetch(`/delete?username=${username}`, {
-        method: 'DELETE',
-      });
-      if (!response.ok) {
-        throw new Error('Failed to delete user');
+      if (window.confirm('Are you sure you want to delete this user?')) {
+        const response = await fetch(`/users/${id}`, {
+          method: 'DELETE',
+        });
+        if (!response.ok) {
+          throw new Error('Failed to delete user');
+        }
+        // Do not call getUsers here; it will be called automatically after setting users in the state
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id)); // Remove the deleted user from the state
       }
-      // Refresh the user list after successful deletion
-      getUsers();
     } catch (error) {
       console.error(error);
     }
   };
+  
 
   useEffect(() => {
     getUsers();
@@ -51,10 +59,8 @@ function UserList() {
         <ul>
           {users.map((user) => (
             <li key={user.id}>
-              {user.username}
-              <button onClick={() => handleDeleteUser(user.username)}>
-                Delete
-              </button>
+              {user.index}. {user.username} {/* Display the index */}
+              <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
             </li>
           ))}
         </ul>

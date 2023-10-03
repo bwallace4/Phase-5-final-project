@@ -79,13 +79,10 @@ def update_user(user_id):
     return jsonify({"message": "User updated successfully"}), 200
 
 # Delete a user by username
-@app.route("/delete", methods=["DELETE"])
-def delete_user():
-    username = request.args.get("username")
-    if not username:
-        return jsonify({"error": "Username is required"}), 400
+@app.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    user = User.query.get(user_id)
 
-    user = User.query.filter_by(username=username).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
 
