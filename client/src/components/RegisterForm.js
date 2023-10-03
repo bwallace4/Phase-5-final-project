@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom'; // Import useHistory
+import './RegisterForm.css';
 
 function RegisterForm() {
   const history = useHistory(); // Initialize useHistory
@@ -45,8 +46,8 @@ function RegisterForm() {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
+    <div className="register-form-container"> {/* Apply the container class */}
+      <h2>Login</h2>
       <div>
         <input
           type="text"
@@ -77,9 +78,16 @@ function RegisterForm() {
       <div>
         <button onClick={handleRegistration}>Register</button>
       </div>
-      {message && <p>{message}</p>}
+      {message && <p className="error-message">{message}</p>} {/* Apply the error message class */}
     </div>
   );
 }
+
+
+
+
+
+
+
 
 export default RegisterForm;

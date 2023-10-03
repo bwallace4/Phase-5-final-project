@@ -1,5 +1,6 @@
 // SuccessPage.js
 import React from 'react';
+import './SuccessPage.css'; 
 
 function SuccessPage() {
   return (

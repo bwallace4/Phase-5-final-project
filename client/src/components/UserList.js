@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import './UserList.css';
 
 function UserList() {
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showUsers, setShowUsers] = useState(false); // Track whether to display users
 
   const getUsers = async () => {
     setIsLoading(true);
@@ -20,6 +22,7 @@ function UserList() {
       }));
 
       setUsers(usersWithIndex);
+      setShowUsers(true); // Display users when data is available
     } catch (error) {
       console.error(error);
     } finally {
@@ -43,23 +46,19 @@ function UserList() {
       console.error(error);
     }
   };
-  
-
-  useEffect(() => {
-    getUsers();
-  }, []);
 
   return (
-    <div>
+    <div className="user-list-container">
       <h2>User List</h2>
-      <button onClick={getUsers}>Get Users</button>
-      {isLoading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul>
+      <button onClick={getUsers} disabled={isLoading}>
+        {isLoading ? 'Loading...' : 'Get Users'}
+      </button>
+      {showUsers && (
+        <ul className="user-list">
           {users.map((user) => (
             <li key={user.id}>
-              {user.index}. {user.username} {/* Display the index */}
+              <span className="user-index">{user.index}.</span>
+              <span className="user-username">{user.username}</span>
               <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
             </li>
           ))}
