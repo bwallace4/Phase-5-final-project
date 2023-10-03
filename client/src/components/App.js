@@ -1,5 +1,3 @@
-// App.js or your main component
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import RegisterForm from './RegisterForm';

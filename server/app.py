@@ -55,28 +55,39 @@ def get_users():
 # Update a specific user by ID
 @app.route("/update/<int:user_id>", methods=["PUT"])
 def update_user(user_id):
-    data = request.json
-    username = data.get("username")
-    if not username:
-        return jsonify({"error": "Username is required"}), 400
+    try:
+        data = request.json
+        username = data.get("username")
+        
+        if not username:
+            return jsonify({"error": "Username is required"}), 400
 
-    user_to_update = User.query.get(user_id)
+        user_to_update = User.query.get(user_id)
 
-    if not user_to_update:
-        return jsonify({"error": "User not found"}), 404
+        if not user_to_update:
+            return jsonify({"error": "User not found"}), 404
 
-    # Check if the provided username matches the user's current username
-    if user_to_update.username != username:
-        return jsonify({"error": "You can only update your own account"}), 403
+        # Check if the provided username matches the user's current username
+        if user_to_update.username != username:
+            return jsonify({"error": "You can only update your own account"}), 403
 
-    if "password" in data:
-        password = data["password"]
-        hashed_password = generate_password_hash(password, method="sha256")
-        user_to_update.password_hash = hashed_password
+        # You may want to add additional validation here for other fields if needed
 
-    db.session.commit()
+        # Update the user's information (e.g., username or password)
+        if "password" in data:
+            password = data["password"]
+            hashed_password = generate_password_hash(password, method="sha256")
+            user_to_update.password_hash = hashed_password
 
-    return jsonify({"message": "User updated successfully"}), 200
+        # Commit the changes to the database
+        db.session.commit()
+
+        return jsonify({"message": "User updated successfully"}), 200
+    except Exception as e:
+        # Log the error for debugging purposes
+        print(str(e))
+        return jsonify({"error": "An error occurred while updating the user"}), 500
+
 
 # Delete a user by username
 @app.route('/users/<int:user_id>', methods=['DELETE'])
