@@ -1,47 +1,54 @@
 #!/usr/bin/env python3
 from flask import request, jsonify, make_response
 from flask_restful import Resource
-from werkzeug.security import generate_password_hash, check_password_hash
-
-
 # Local imports
 from config import app, db, api
-
 # Add your model imports
 from models import User, Tag, Post
+import json  # Import the json module
 
 
-@app.route("/register", methods=["POST"])
-def register_user():
-    data = request.json
 
-    # Check if the required fields are present in the request data
-    required_fields = ["username", "email", "password"]
-    if not all(field in data for field in required_fields):
-        return jsonify({"error": "Missing required fields"}), 400
 
-    # Check if a user with the same username or email already exists
-    existing_user = User.query.filter_by(username=data["username"]).first()
-    if existing_user:
-        return jsonify({"error": "Username is already taken"}), 400
+class RegisterUserResource(Resource):
+    def post(self):
+        data = request.get_json()
 
-    existing_email = User.query.filter_by(email=data["email"]).first()
-    if existing_email:
-        return jsonify({"error": "Email is already registered"}), 400
+        # Check if the required fields are present in the request data
+        required_fields = ["username", "email", "password"]
+        if not all(field in data for field in required_fields):
+            return json.dumps({"error": "Missing required fields"}), 400  # Use json.dumps here
 
-    # Hash the password before storing it in the database
-    password = data["password"]
-    hashed_password = generate_password_hash(password, method="sha256")
+        # Check if a user with the same username or email already exists
+        existing_user = User.query.filter_by(username=data["username"]).first()
+        if existing_user:
+            return json.dumps({"error": "Username is already taken"}), 400  # Use json.dumps here
 
-    # Create a new User instance
-    new_user = User(username=data["username"], email=data["email"], password_hash=hashed_password)
+        existing_email = User.query.filter_by(email=data["email"]).first()
+        if existing_email:
+            return json.dumps({"error": "Email is already registered"}), 400  # Use json.dumps here
 
-    # Add the new user to the database
-    db.session.add(new_user)
-    db.session.commit()
+        try:
+            # Create a new User instance and set the password directly
+            new_user = User(username=data["username"], email=data["email"])
+            new_user.password = data["password"]
 
-    return jsonify({"message": "User registered successfully"}), 201
+            # Add the new user to the database
+            db.session.add(new_user)
+            db.session.commit()
 
+            response_data = {"message": "User registered successfully"}
+            return json.dumps(response_data), 201  # Use json.dumps here
+        except Exception as e:
+            error_data = {"error": str(e)}
+            return json.dumps(error_data), 500  # Handle other exceptions gracefully and use json.dumps here
+
+# Add the RegisterUserResource to your API
+api.add_resource(RegisterUserResource, '/register')
+
+
+
+     
 # Get all users
 @app.route("/users", methods=["GET"])
 def get_users():
