@@ -1,10 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState} from 'react';
 import './UserList.css';
 
 function UserList() {
   const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const usersPerPage = 5; // Number of users to display per page
+  const indexOfLastUser = currentPage * usersPerPage;
+  const indexOfFirstUser = indexOfLastUser - usersPerPage;
+  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+
   const [isLoading, setIsLoading] = useState(false);
-  const [showUsers, setShowUsers] = useState(false); // Track whether to display users
+  const [showUsers, setShowUsers] = useState(false);
 
   const getUsers = async () => {
     setIsLoading(true);
@@ -14,15 +20,8 @@ function UserList() {
         throw new Error('Failed to fetch users');
       }
       const data = await response.json();
-
-      // Add an 'index' property to each user object
-      const usersWithIndex = data.map((user, index) => ({
-        ...user,
-        index: index + 1, // Add 1 to start indexing from 1
-      }));
-
-      setUsers(usersWithIndex);
-      setShowUsers(true); // Display users when data is available
+      setUsers(data);
+      setShowUsers(true);
     } catch (error) {
       console.error(error);
     } finally {
@@ -39,12 +38,15 @@ function UserList() {
         if (!response.ok) {
           throw new Error('Failed to delete user');
         }
-        // Do not call getUsers here; it will be called automatically after setting users in the state
-        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id)); // Remove the deleted user from the state
+        setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
       }
     } catch (error) {
       console.error(error);
     }
+  };
+
+  const paginate = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   return (
@@ -54,18 +56,27 @@ function UserList() {
         {isLoading ? 'Loading...' : 'Get Users'}
       </button>
       {showUsers && (
-        <ul className="user-list">
-          {users.map((user) => (
-            <li key={user.id}>
-              <span className="user-index">{user.index}.</span>
-              <span className="user-username">{user.username}</span>
-              <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
-            </li>
-          ))}
-        </ul>
+        <>
+          <ul className="user-list">
+            {currentUsers.map((user) => (
+              <li key={user.id}>
+                <span className="user-username">{user.username}</span>
+                <button onClick={() => handleDeleteUser(user.id)}>Delete</button>
+              </li>
+            ))}
+          </ul>
+          <div className="pagination">
+            {Array.from({ length: Math.ceil(users.length / usersPerPage) }).map((_, index) => (
+              <button key={index} onClick={() => paginate(index + 1)}>
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
 }
 
 export default UserList;
+
