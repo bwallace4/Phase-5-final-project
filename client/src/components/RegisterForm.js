@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import { useHistory } from 'react-router-dom'; // Import useHistory
+import { useHistory } from 'react-router-dom';
 import './RegisterForm.css';
 
 function RegisterForm() {
-  const history = useHistory(); // Initialize useHistory
+  const history = useHistory();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
   });
 
-  const [message, setMessage] = useState('');
+  const [errors, setErrors] = useState({}); // Store validation errors
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -19,7 +19,6 @@ function RegisterForm() {
       [name]: value,
     });
   };
-
   const handleRegistration = () => {
     // Send a POST request to /register with formData
     fetch('/register', {
@@ -32,22 +31,29 @@ function RegisterForm() {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          setMessage(data.error);
+          // Handle validation errors received from the server
+          setErrors(data); // Set errors in the state
         } else {
-          setMessage(data.message);
-          // Redirect the user to another page upon successful registration
-          history.push('/success-page'); // Use history.push to navigate to the new page
+          // Clear any previous errors
+          setErrors({});
+          // Check if registration was successful
+          if (data.message === "User registered successfully") {
+            // Redirect the user to another page upon successful registration
+            history.push('/success-page');
+          }
+          // Optionally, you can show a success message or take other actions here
         }
       })
       .catch((error) => {
         // Handle any network or request errors
         console.error(error);
+        // Optionally, you can set an error state here to inform the user
       });
   };
-
+  
   return (
-    <div className="register-form-container"> {/* Apply the container class */}
-      <h2>Login</h2>
+    <div className="register-form-container">
+      <h2>Register</h2>
       <div>
         <input
           type="text"
@@ -56,6 +62,7 @@ function RegisterForm() {
           value={formData.username}
           onChange={handleInputChange}
         />
+        {errors.username && <p className="error-message">Error: {errors.username}</p>}
       </div>
       <div>
         <input
@@ -65,6 +72,7 @@ function RegisterForm() {
           value={formData.email}
           onChange={handleInputChange}
         />
+        {errors.email && <p className="error-message">Error: {errors.email}</p>}
       </div>
       <div>
         <input
@@ -74,20 +82,15 @@ function RegisterForm() {
           value={formData.password}
           onChange={handleInputChange}
         />
+        {errors.password && <p className="error-message">Error: {errors.password}</p>}
       </div>
       <div>
         <button onClick={handleRegistration}>Register</button>
       </div>
-      {message && <p className="error-message">{message}</p>} {/* Apply the error message class */}
     </div>
   );
 }
 
-
-
-
-
-
-
-
 export default RegisterForm;
+
+
