@@ -3,8 +3,10 @@ import { BrowserRouter as Router, Route, Link, Switch } from 'react-router-dom';
 import RegisterForm from './RegisterForm';
 import SuccessPage from './SuccessPage';
 import UserList from './UserList';
-import LoginForm from './LoginForm'; // Import the LoginForm component
-import './Navbar.css';
+import LoginForm from './LoginForm';
+import CheckSession from './CheckSession';
+import Logout from './Logout'; // Import the Logout component
+import './Navbar.css'; 
 
 function App() {
   return (
@@ -21,7 +23,10 @@ function App() {
             <Link to="/success-page">Success Page</Link>
           </li>
           <li>
-            <Link to="/login">Login</Link> {/* Add a link to the login page */}
+            <Link to="/login">Login</Link>
+          </li>
+          <li>
+            <Logout /> {/* Include the Logout component */}
           </li>
         </ul>
       </nav>
@@ -29,7 +34,12 @@ function App() {
       <Switch>
         <Route path="/success-page" component={SuccessPage} />
         <Route path="/user-list" component={UserList} />
-        <Route path="/login" component={LoginForm} /> {/* Add the login route */}
+        <Route path="/login">
+          <div>
+            <LoginForm />
+            <CheckSession />
+          </div>
+        </Route>
         <Route path="/" component={RegisterForm} />
       </Switch>
     </Router>

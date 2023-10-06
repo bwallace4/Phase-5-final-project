@@ -90,6 +90,11 @@ class CheckSession(Resource):
 
         return {}, 204
 
+class Logout(Resource):
+    def delete(self):
+        # Clear user's session
+        session.clear()
+        return {}, 204
 
 
 
@@ -98,6 +103,7 @@ class CheckSession(Resource):
 api.add_resource(RegisterUserResource, "/register")
 api.add_resource(Login, "/login")
 api.add_resource(CheckSession, '/check-session')
+api.add_resource(Logout, '/logout')
 
 # Get all users
 @app.route("/users", methods=["GET"])
