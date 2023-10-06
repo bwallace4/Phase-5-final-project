@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-from flask import request, jsonify, make_response
+from flask import request, jsonify, session
 from flask_restful import Resource
-
+from sqlalchemy.exc import IntegrityError
 # Local imports
 from config import app, db, api
 
@@ -20,7 +20,7 @@ class RegisterUserResource(Resource):
             return (
                 json.dumps({"error": "Missing required fields"}),
                 400,
-            )  # Use json.dumps here
+            )
 
         # Check if a user with the same username or email already exists
         existing_user = User.query.filter_by(username=data["username"]).first()
@@ -28,36 +28,66 @@ class RegisterUserResource(Resource):
             return (
                 json.dumps({"error": "Username is already taken"}),
                 400,
-            )  # Use json.dumps here
+            )
 
         existing_email = User.query.filter_by(email=data["email"]).first()
         if existing_email:
             return (
                 json.dumps({"error": "Email is already registered"}),
                 400,
-            )  # Use json.dumps here
+            )
 
         try:
-            # Create a new User instance and set the password directly
+            # Create a new User instance and set the username and email
             new_user = User(username=data["username"], email=data["email"])
-            new_user.password = data["password"]
+
+            # Hash the plaintext password and set it in the User model
+            new_user.password_hash = data["password"]
 
             # Add the new user to the database
             db.session.add(new_user)
             db.session.commit()
 
+            # Store the user's ID in the session to authenticate them
+            session['user_id'] = new_user.id
+
             response_data = {"message": "User registered successfully"}
-            return json.dumps(response_data), 201  # Use json.dumps here
+            return json.dumps(response_data), 201
+        except IntegrityError:
+            return (
+                json.dumps({"error": "Username or email is already taken"}),
+                422,
+            )
         except Exception as e:
             error_data = {"error": str(e)}
             return (
                 json.dumps(error_data),
                 500,
-            )  # Handle other exceptions gracefully and use json.dumps here
+            )
+
+class Login(Resource):
+    def post(self):
+        data = request.get_json()
+
+        username = data.get('username')
+        password = data.get('password')
+
+        user = User.query.filter(User.username == username).first()
+
+        if user:
+            if user.authenticate(password):
+                session['user_id'] = user.id
+                return user.to_dict(), 200
+
+        return {'error': '401 Unauthorized'}, 401
+
+
+
 
 
 # Add the RegisterUserResource to your API
 api.add_resource(RegisterUserResource, "/register")
+api.add_resource(Login, "/login")
 
 
 # Get all users
