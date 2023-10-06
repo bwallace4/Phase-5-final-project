@@ -115,6 +115,15 @@ def update_user(user_id):
 
     if request.method == 'PATCH':
         data = request.get_json()
+
+        # Check if the new username already exists for another user
+        new_username = data.get("username")
+        existing_user_with_username = User.query.filter(User.username == new_username).first()
+
+        if existing_user_with_username and existing_user_with_username.id != user_id:
+            return json.dumps({"error": "Username is already taken"}), 400
+
+        # Update the user's data
         for attr in data:
             setattr(user, attr, data[attr])
 
@@ -123,6 +132,7 @@ def update_user(user_id):
         response_data = user.to_dict()
 
         return json.dumps(response_data), 200
+
 
 # Get all users
 @app.route("/users", methods=["GET"])

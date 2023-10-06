@@ -5,7 +5,8 @@ import SuccessPage from './SuccessPage';
 import UserList from './UserList';
 import LoginForm from './LoginForm';
 import CheckSession from './CheckSession';
-import Logout from './Logout'; // Import the Logout component
+import Logout from './Logout';
+import UpdateUserForm from './UpdateUserForm'; // Import the UpdateUserForm component
 import './Navbar.css'; 
 
 function App() {
@@ -26,7 +27,7 @@ function App() {
             <Link to="/login">Login</Link>
           </li>
           <li>
-            <Logout /> {/* Include the Logout component */}
+            <Logout />
           </li>
         </ul>
       </nav>
@@ -40,6 +41,7 @@ function App() {
             <CheckSession />
           </div>
         </Route>
+        <Route path="/update-user/:userId" component={UpdateUserForm} /> {/* Add this route */}
         <Route path="/" component={RegisterForm} />
       </Switch>
     </Router>
