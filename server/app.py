@@ -81,6 +81,15 @@ class Login(Resource):
 
         return {'error': '401 Unauthorized'}, 401
 
+class CheckSession(Resource):
+    def get(self):
+        if session.get('user_id'):
+            user = User.query.filter(User.id == session['user_id']).first()
+            if user:
+                return user.to_dict(), 200
+
+        return {}, 204
+
 
 
 
@@ -88,7 +97,7 @@ class Login(Resource):
 # Add the RegisterUserResource to your API
 api.add_resource(RegisterUserResource, "/register")
 api.add_resource(Login, "/login")
-
+api.add_resource(CheckSession, '/check-session')
 
 # Get all users
 @app.route("/users", methods=["GET"])
