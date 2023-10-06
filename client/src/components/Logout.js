@@ -1,5 +1,6 @@
 import React from 'react';
 
+
 function Logout() {
   const handleLogout = () => {
     // Send a DELETE request to the /logout route
@@ -8,8 +9,8 @@ function Logout() {
     })
       .then((response) => {
         if (response.status === 204) {
-          // Logout successful, you can perform additional actions here
-          console.log('Logged out successfully');
+          // Logout successful, refresh the page
+          window.location.reload();
         } else {
           // Handle logout error
           console.error('Logout failed');

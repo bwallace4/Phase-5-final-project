@@ -105,6 +105,25 @@ api.add_resource(Login, "/login")
 api.add_resource(CheckSession, '/check-session')
 api.add_resource(Logout, '/logout')
 
+
+@app.route('/users/<int:user_id>', methods=['PATCH'])
+def update_user(user_id):
+    user = User.query.get(user_id)
+
+    if not user:
+        return json.dumps({"error": "User not found"}), 404
+
+    if request.method == 'PATCH':
+        data = request.get_json()
+        for attr in data:
+            setattr(user, attr, data[attr])
+
+        db.session.commit()
+
+        response_data = user.to_dict()
+
+        return json.dumps(response_data), 200
+
 # Get all users
 @app.route("/users", methods=["GET"])
 def get_users():
